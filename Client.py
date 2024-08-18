@@ -73,7 +73,7 @@ class mainAPP(Tk):
             self.setStatus("Status : Connected!!!")
             self.button.config(state=DISABLED)
             while True:
-                    data = self.client_socket.recv(16384)
+                    data = self.client_socket.recv(524288)
                     self.TypeChecking(data=data)
         except socket.gaierror:
             self.setStatus("Status : Dosn't fund IP SERVER ")
@@ -163,7 +163,7 @@ class mainAPP(Tk):
         if self.__pathlook:
             self.doHavePath()
             self.bb.grid_forget()
-
+            
     def widgetOnline(self):
         self.TKonline = Frame(self.mainLeft)
         self.TKonline.grid(row=5,column=0,columnspan=3,sticky="nw",padx=10,pady=5)

@@ -10,13 +10,49 @@ import socket
 import uuid 
 import typing
 import json
-from TypeCode import TypeCode,Mysocket
+from TypeCode import TypeCode,Mysocket,UpdateType
 import Checksum
 import Ignore
 from Mywatchdog import NewFileHandler
 
 Clients : typing.Dict[typing.Any,Mysocket] = {}
 Folder_look : str
+
+def dodetele(*args):
+    os.
+def donew(*args):
+    with open("logServer","a",encoding="UTF-8") as f:
+        f.write(f"{args[0]}:f{Checksum.calculate_checksum(args[0])}\n")
+        f.close()
+    
+def CheckingLogServer(file,Path,sum1):
+    add:bool=False
+    with open(file,"r+",encoding="UTF-8") as f:
+        while 1:
+            data = f.readline()
+            print(data)
+            if not data:
+                add = True
+                break
+            path,_sum = data.split(":")
+            if path == Path:
+                if sum1 != _sum:
+                    f.write(f"{path}:f{sum1}\n")
+                    return True
+                else:
+                    return False
+        f.close()
+    if add:
+        with open(file,"a",encoding="UTF-8") as f:
+            f.write(f"{path}:f{sum1}\n")
+            f.close()
+    return True
+def domodified(*args):
+    a= Checksum.calculate_checksum(args[0])
+    if CheckingLogServer(args[0],"logServer",a):
+        for x in Clients.values():
+            x.senddict({"file":[args[0][Folder_look+1:],a],
+                        "TYPEUPDATE":UpdateType.NEW},TypeCode.UPDATE)        
 def Type4do(UUID):
     socket=Clients[UUID]
     Ignorefile = Ignore.IgnoreFile()
@@ -57,7 +93,7 @@ def handle_client(client_socket : Mysocket, client_address):
     print(f"Accepted connection from {client_address}")
     while True:
         try:
-            request = client_socket.mysocket.recv(16384)
+            request = client_socket.mysocket.recv(524288)
             if not request:
                 break
             TypeChecker(request.decode())
@@ -110,6 +146,7 @@ def start_watchdog(path):
     print("Now pid Watchdog",os.getpid())
     try:
         event_handler = NewFileHandler()
+        event_handler.do_new = donew
         observer = Observer()
         observer.schedule(event_handler, path, recursive=True)
         observer.start()
@@ -124,7 +161,20 @@ def start_watchdog(path):
 
 def ThreadingProgram():
     global Folder_look
+    global Listserver
     Folder_look = input("Folder (c:/program) : ")
+    Ignorefile = Ignore.IgnoreFile()
+    lists=[]
+    with open("logServer","w",encoding="UTF-8") as f:
+        for root,directory,files in os.walk(Folder_look):
+            for x in directory:
+                if not Ignorefile.Folder_Check(os.path.join(x)):
+                    directory.remove(x)
+            for file in files:
+                if Ignorefile.Check(a:=os.path.join(root,file)):
+                    print("readding",a)
+                    f.write(f"{a}:{Checksum.calculate_checksum(a)}\n")
+        f.close()
     ftp_thread = threading.Thread(target=run_ftp_server,args=[os.path.join(Folder_look),])
     socket_thread = threading.Thread(target=start_server,daemon=True)
     start_watchdog_thread = threading.Thread(target=start_watchdog,args=[os.path.join(Folder_look),])

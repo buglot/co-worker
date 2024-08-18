@@ -1,5 +1,4 @@
 co-worklib/
-.ckignore
 .ckignore.test
 log
 __pycache__/

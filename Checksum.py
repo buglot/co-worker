@@ -8,7 +8,7 @@ def calculate_checksum(file_path, algorithm='md5'):
             hash_func.update(chunk)
     return hash_func.hexdigest()
 
-def allChacksum(paths : list,root=None)->dict:
+def allChacksum(paths : list,root=None)->list:
     
     data = []
     for path in paths:
@@ -17,7 +17,15 @@ def allChacksum(paths : list,root=None)->dict:
         else:
             data.append([path,calculate_checksum(path)])
     return data
-
+def allChacksumServer(paths : list,root=None)->dict:
+    
+    data = {}
+    for path in paths:
+        if root:
+            data[path[len(root)+1:]] = calculate_checksum(path)
+        else:
+            data[path]=calculate_checksum(path)
+    return data
 def save(data:dict):
     a =json.JSONEncoder()
     with open("log","w+",encoding="UTF-8") as f:

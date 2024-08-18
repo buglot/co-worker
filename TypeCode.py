@@ -9,6 +9,10 @@ class TypeCode(enum.Enum):
     DISCONNECTION =5
     PING=6
     UUID=7
+class UpdateType(enum.Enum):
+        NEW= 1
+        DELETE =2
+        RENAME = 3
 class TypeIgnore(enum.Enum):
     FOLDER ="FOLDER"
     EXTENSION ="EXTENSION"
