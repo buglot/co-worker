@@ -15,7 +15,8 @@ class NewFileHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if self.Ignore.Check(event.src_path) and not os.path.isdir(event.src_path):
             print(f"ไฟล์ถูกแก้ไข: {event.src_path}")
-            # self.do_modi(event.src_path)
+            domodi_thread = threading.Thread(target=self.do_modi,args=[event.src_path],daemon=True)
+            domodi_thread.start()
     def on_deleted(self,event):
         if self.Ignore.Check(event.src_path):
             print(f"ไฟล์ถูกลบ: {event.src_path}")

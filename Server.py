@@ -18,8 +18,29 @@ from Mywatchdog import NewFileHandler
 Clients : typing.Dict[typing.Any,Mysocket] = {}
 Folder_look : str
 
+def sendWithOut(UUID:str,data:dict,Type:TypeCode|UpdateType):
+    if type(Type) == UpdateType:
+        data["updatetype"] = Type.value
+        Type = TypeCode.UPDATE
+    for x in Clients.values():
+        if x.uuid !=UUID:
+            x.senddict(data,Type)
+
+
+
 def dodetele(*args):
-    os.
+    path =os.path.join(Folder_look,args[0])
+    try:
+        if os.path.exists(path) and not os.path.isdir(path):
+            os.remove(path)
+        elif os.path.exists(path) and os.path.isdir(path):
+            os.mkdir(path)
+        print("delete :",path)
+    except Exception as e:
+        print(e)
+    data={"path":path}
+    sendWithOut(args[1],data,UpdateType.DELETE)
+        
 def donew(*args):
     with open("logServer","a",encoding="UTF-8") as f:
         f.write(f"{args[0]}:f{Checksum.calculate_checksum(args[0])}\n")
@@ -89,6 +110,11 @@ def TypeChecker(data:str):
         case TypeCode.PING:
             socket=Clients[UUID]
             socket.senddict({},TypeCode.PING)
+        case TypeCode.UPDATE:
+            match UpdateType(["updatetype"]):
+                case UpdateType.DELETE:
+                    deleteThread = threading.Thread(target=dodetele,args=[_newData["path"],UUID],daemon=True)
+                    deleteThread.start()
 def handle_client(client_socket : Mysocket, client_address):
     print(f"Accepted connection from {client_address}")
     while True:
@@ -147,6 +173,7 @@ def start_watchdog(path):
     try:
         event_handler = NewFileHandler()
         event_handler.do_new = donew
+        event_handler.do_modi = domodified
         observer = Observer()
         observer.schedule(event_handler, path, recursive=True)
         observer.start()
